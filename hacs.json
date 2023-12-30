@@ -1,4 +1,5 @@
 {
   "name": "heatapp",
-  "render_readme": true
+  "render_readme": true,
+  "domains": ["climate", "sensor"]
 }
