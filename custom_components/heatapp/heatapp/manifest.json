@@ -1,0 +1,16 @@
+{
+  "domain": "heatapp",
+  "name": "heatapp",
+  "codeowners": [
+    "@imnatgreen"
+  ],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/imnatgreen/homeassistant-heatapp",
+  "homekit": {},
+  "integration_type": "hub",
+  "iot_class": "local_polling",
+  "requirements": [],
+  "ssdp": [],
+  "zeroconf": []
+}
