@@ -19,7 +19,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.data.setdefault(DOMAIN, {})
 
-    hub = heatapp.HeatappHub(entry.data[CONF_HOST], entry.data[CONF_PORT])
+    try:
+        hub = heatapp.HeatappHub(entry.data[CONF_HOST], entry.data[CONF_PORT])
+    except ConnectionError as ex:
+        raise ConfigEntryNotReady(f"Error connecting to the hub: {ex}") from ex
 
     if not hub.ready():
         raise ConfigEntryNotReady(

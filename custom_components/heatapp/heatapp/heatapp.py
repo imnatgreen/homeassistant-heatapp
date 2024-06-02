@@ -19,6 +19,8 @@ class HeatappHub:
         self._lock = threading.Lock()
 
         fw = self.get_fw()
+        if fw is None:
+            raise ConnectionError("Could not connect to the hub.")
         self.firmware = fw["firmware"]
         self.device_id = fw["device_id"]
         self.idu = fw["idu"]
@@ -117,10 +119,20 @@ class HeatappRadiator:
 
     def set_temperature(self, target):
         """Set a new target temperature for the radiator."""
-        command = f"D#{self.rad_id}#1#0#0*T{target}/"
-        r = self._hub.send_command(command).split(",")
-        if r[0] == "OK":
-            return True
+        rad_count = self._hub.radiators_per_zone[
+            self._hub.radiator_ids.index(self.rad_id)
+        ]
+        okay = False
+
+        for i in range(1, rad_count + 1):
+            command = f"D#{self.rad_id}#{i}#0#0*T{target}/"
+            r = self._hub.send_command(command).split(",")
+            if r[0] == "OK":
+                okay = True
+            else:
+                okay = False
+
+        return okay
 
     def get_energy_usage(self):
         """Get today's energy usage for the radiator."""
@@ -129,15 +141,21 @@ class HeatappRadiator:
         ]
 
         total = 0.0
+        okay = False
 
         for i in range(1, rad_count + 1):
             command = f"R#{self.rad_id}#{i}#0#0*?UD/"
             r = self._hub.send_command(command).split(",")
             if r[0] == "OK":
+                okay = True
                 multiplier = int(r[1]) / 10000
                 total += float(int(r[2]) * multiplier)
+            else:
+                okay = False
 
-        return total
+        if okay:
+            return total
+        return None
 
     def __get_power(self):
         """Get the total power of the radiators in the zone, in watts."""
@@ -164,23 +182,7 @@ class HeatappRadiator:
                 "firmware": r[1],
                 "serial": r[2],
             }
-
-
-# hub = HeatappHub("10.10.30.246", 6653)
-
-# rad = HeatappRadiator(hub, 6)
-# print(rad.power)
-# print(rad.firmware)
-# print(rad.serial)
-
-# print(f"{hub.send_command(f'R#6#1#0#0*?UD/')}")
-# print(f"{hub.send_command(f'R#6#1#0#0*?UH/')}")
-
-# rad = HeatappRadiator(hub, 10)
-# print(rad.get_energy_usage())
-# for i in hub.radiator_ids:
-#     rad = HeatappRadiator(hub, i)
-#     start = time.time()
-#     print(f"{i}: {rad.get_temperature()} (took {time.time() - start:.3f}s)")
-
-# write a python array of the letters of the alphabet
+        return {
+            "firmware": None,
+            "serial": None,
+        }

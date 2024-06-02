@@ -36,11 +36,6 @@ async def async_setup_entry(
     for i in hub.radiator_ids:
         async_add_radiator(i)
 
-    # # register listener for new lights
-    # config_entry.async_on_unload(
-    #     controller.subscribe(async_add_light, event_filter=EventType.RESOURCE_ADDED)
-    # )
-
 
 class HeatappRadiator(ClimateEntity):
     """Representation of a heatapp radiator."""
